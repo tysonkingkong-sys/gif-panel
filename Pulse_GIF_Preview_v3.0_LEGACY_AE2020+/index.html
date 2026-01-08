@@ -1,0 +1,394 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GIF Preview</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="CSInterface.js"></script>
+  <base target="_blank">
+  
+  <!-- Load scripts in order (NO ES6 modules for CEP compatibility) -->
+  <script src="js/core/state.js"></script>
+  <script src="js/core/dom.js"></script>
+  <script src="js/utils/helpers.js"></script>
+  <script src="js/utils/Transform.js"></script>
+  <script src="js/services/indexedDB.js"></script>
+  <script src="js/services/storage.js"></script>
+  <script src="js/services/cep.js"></script>
+  <script src="js/modules/media.js"></script>
+  <script src="js/modules/history.js"></script>
+  <script src="js/ui/themes.js"></script>
+  <script src="js/ui/modals.js"></script>
+  <script src="js/ui/controls.js"></script>
+  <script src="js/core/app.js"></script>
+  <script src="js/main.js"></script>
+</head>
+
+<body>
+  <div class="app fitFill" id="app">
+    
+    <!-- ================= UPDATE LOG MODAL ================= -->
+    <div id="updateModal" class="modal hidden" aria-hidden="true">
+      <div class="modalBackdrop"></div>
+
+      <div class="modalCard" role="dialog" aria-modal="true" aria-label="Update Logs">
+        <div class="modalHeader">
+          <div class="modalTitle">Update Logs!</div>
+
+          <button id="updateClose" class="modalClose" title="Close" aria-label="Close">
+            <span class="x1"></span>
+            <span class="x2"></span>
+          </button>
+        </div>
+
+        <div class="modalBody">
+          <div class="modalLeft">
+            <div class="modalLeftImg" aria-hidden="true"></div>
+          </div>
+
+          <div class="modalRight">
+            <div id="updateHeading" class="updateHeading"></div>
+
+            <div class="updateScroll">
+              <div id="updateSubtext" class="updateSubtext"></div>
+              <div id="updateBullets" class="updateBullets"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- =============== END UPDATE LOG MODAL =============== -->
+
+    <!-- Replace your current corner divs with these -->
+    <div class="corner tl minimal"></div>
+    <div class="corner tr minimal"></div>
+    <div class="corner bl minimal"></div>
+    <div class="corner br minimal"></div>
+
+    <!-- ================= SETTINGS MODAL ================= -->
+    <div id="settingsModal" class="modal hidden" aria-hidden="true">
+      <div class="modalBackdrop"></div>
+
+      <div class="modalCard">
+        <div class="modalHeader">
+          <div class="modalTitle">Settings</div>
+          <button id="settingsClose" class="modalClose">✕</button>
+        </div>
+
+        <div class="modalBody settingsBody">
+
+          <!-- Tabs -->
+          <div class="settingsTabs">
+            <button class="settingsTab active" data-tab="general">General</button>
+            <button class="settingsTab" data-tab="history">History</button>
+            <button class="settingsTab" data-tab="info">Info</button>
+            <button class="settingsTab" data-tab="contact">Contact / Help</button>
+          </div>
+
+          <!-- Panel -->
+          <div class="settingsPanel">
+
+            <!-- GENERAL TAB -->
+            <div class="settingsTabPage active" data-page="general">
+            <!-- Updated Theme Selector - Replace the existing theme selector in your index.html -->
+<!-- Enhanced Theme Selector - Replace in your index.html Settings > General tab -->
+<div class="settingRow">
+  <label>Theme</label>
+  <select id="themeSelect">
+    <option value="blue">🔵 Blue (Default)</option>
+    <option value="pink">💖 Pink</option>
+    <option value="purple">💜 Purple</option>
+    <option value="green">💚 Green</option>
+    <option value="orange">🧡 Orange</option>
+    <option value="red">❤️ Red</option>
+    <option value="teal">🩵 Teal</option>
+    <option value="yellow">💛 Yellow</option>
+    <option value="white">🤍 White</option>
+    <option value="black">🖤 Black</option>
+  </select>
+  <div class="settingHelp">Choose a color theme for the entire interface</div>
+</div>
+
+              <!-- Rounded Corners Toggle -->
+              <div class="settingRow">
+                <label class="toggle-label" style="justify-content: space-between; width: 100%;">
+                  <span class="toggle-text">Rounded Corners</span>
+                  <div class="toggle-container">
+                    <input type="checkbox" id="cornersToggle" checked>
+                    <div class="toggle-slider">
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </label>
+                <div class="settingHelp">Enable/disable rounded corners on the drop panel</div>
+              </div>
+
+              <!-- Volume Control -->
+              <div class="settingRow value-setting">
+                <label>Video Volume</label>
+                <div class="volume-control-container">
+                  <div class="volume-icon-wrapper">
+                    <button id="volumeMuteBtn" class="volume-mute-btn" title="Mute/Unmute">
+                      <span class="volume-icon">🔊</span>
+                    </button>
+                  </div>
+                  <div class="volume-slider-wrapper">
+                    <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1" class="volume-slider">
+                    <div class="volume-track">
+                      <div class="volume-progress"></div>
+                    </div>
+                    <div class="volume-ticks">
+                      <div class="tick"></div>
+                      <div class="tick"></div>
+                      <div class="tick"></div>
+                      <div class="tick"></div>
+                      <div class="tick"></div>
+                    </div>
+                  </div>
+                  <div class="volume-value-wrapper">
+                    <span class="volume-percentage">100%</span>
+                    <div class="volume-bars">
+                      <div class="bar"></div>
+                      <div class="bar"></div>
+                      <div class="bar"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="volume-feedback" id="volumeFeedback"></div>
+              </div>
+
+              <!-- History Limit -->
+              <div class="settingRow value-setting">
+                <label for="historyLimitInput">History Limit</label>
+                <div class="input-wrapper">
+                  <input type="number" id="historyLimitInput" min="5" max="50" step="1" value="12">
+                  <span class="input-validation"></span>
+                </div>
+                <div class="settingHelp">Number of recent items to keep in history</div>
+              </div>
+            </div>
+
+            <!-- HISTORY TAB -->
+            <div class="settingsTabPage" data-page="history">
+              <div class="historyPage">
+                <h2 class="historyTitle">Recent Media</h2>
+                <div class="historySubtext">Your last 12 items - newest first</div>
+                <div id="gifHistory" class="gifHistory"></div>
+              </div>
+            </div>
+
+            <!-- INFO TAB -->
+            <div class="settingsTabPage" data-page="info">
+              <div class="infoPage">
+                <h2 class="infoTitle">Information</h2>
+
+                <div class="infoSection">
+                  <div class="infoLabel">Script Name</div>
+                  <div class="infoValue">Pulse_JT</div>
+                </div>
+
+                <div class="infoSection">
+                  <div class="infoLabel">Version</div>
+                  <div class="infoValue">3.0</div>
+                </div>
+
+                <div class="infoSection">
+                  <div class="infoLabel">Author</div>
+                  <div class="infoValue">Tom</div>
+                </div>
+
+                <div class="infoSection">
+                  <div class="infoLabel">Co-Author</div>
+                  <div class="infoValue">Jay</div>
+                </div>
+
+                <div class="infoDivider"></div>
+
+                <h2 class="infoTitle">Licenses</h2>
+
+                <div class="infoLicense">
+                  This tool is provided "as-is", without warranty of any kind.<br /><br />
+                  You may use, modify, and distribute this script for personal or
+                  commercial projects, provided credit is given to the original authors.
+                  <br /><br />
+                  Redistribution of paid versions or claiming ownership of the original
+                  code is not permitted.
+                </div>
+              </div>
+            </div>
+
+            <!-- CONTACT / HELP TAB -->
+            <div class="settingsTabPage" data-page="contact">
+              <div class="contactPage">
+                <p class="contactText">
+                  If you run into any bugs, crashes, or errors, send me a DM on Discord!
+                </p>
+
+                <button id="discordContact" class="discordCard" onclick="copyDiscordUsername()">
+                  <div class="discordIconWrapper">
+                    <svg class="discordIcon" viewBox="0 0 24 24" width="48" height="48">
+                      <path fill="currentColor" d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
+                    </svg>
+                  </div>
+                  <div class="discordInfo">
+                    <div class="discordName">@inyourrealm</div>
+                    <div class="discordStatus">💬 Click to copy username</div>
+                  </div>
+                </button>
+
+                <div class="contactDivider"></div>
+
+                <div class="contactHelpSection">
+                  <h3 class="contactHelpTitle">Quick Tips</h3>
+                  <ul class="contactHelpList">
+                    <li>📂 Drag & drop any image or video to preview it</li>
+                    <li>🔍 Use mouse wheel to zoom in/out</li>
+                    <li>👆 Click and drag to pan around</li>
+                    <li>🏠 Press Home button to recenter</li>
+                    <li>⌨️ Press ESC to exit fullscreen mode</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Footer -->
+          <div class="settingsFooter">
+            <span>Other scripts · Help pages</span>
+            <span class="version">Pulse_JT 3.0</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- =============== END SETTINGS MODAL =============== -->
+
+    <canvas id="thumbnailCanvas" style="display: none;"></canvas>
+
+    <!-- ================= MAIN PREVIEW ================= -->
+    <div id="drop" class="drop">
+      <img id="gif" class="gif" alt="Image Preview" />
+
+      <div id="placeholder" class="placeholder">
+        <div class="ph-title">Upload Media<br/>here</div>
+      </div>
+
+      <!-- Corner brackets -->
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+
+      <!-- File input (CEP-safe) -->
+      <input
+        id="file"
+        class="fileInput"
+        type="file"
+        accept="image/gif,image/png,image/jpeg,.gif,.png,.jpg,.jpeg,video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+      />
+
+    </div>
+
+    <!-- Clean bottom section - centered and properly spaced -->
+    <div class="bottom">
+      <div class="dock" role="toolbar" aria-label="Tools">
+        <!-- Settings -->
+        <button class="dockBtn" id="btnSettings" title="Settings">
+          <span class="ico">⚙</span>
+        </button>
+
+        <!-- Fit / Fill / Stretch -->
+        <button class="dockBtn active" id="btnFit" title="Fit / Fill / Stretch">
+          <svg viewBox="0 0 24 24" class="fitIcon" aria-hidden="true">
+            <path d="M7 12l-3-3v2H1v2h3v2l3-3zm10 0l3 3v-2h3v-2h-3V9l-3 3z"/>
+          </svg>
+        </button>
+
+        <!-- Home -->
+        <button class="dockBtn" id="btnHome" title="Home (recenter)">
+          <span class="ico">⌂</span>
+        </button>
+
+        <!-- Add -->
+        <button class="dockBtn" id="btnPlus" title="Add / Browse Media">
+          <span class="ico">+</span>
+        </button>
+        
+        <!-- Audio Button - Only shows when video is playing -->
+        <button class="dockBtn" id="btnAudio" title="Toggle Audio (M)" style="display: none;">
+          <span class="ico">🔇</span>
+        </button>
+      </div>
+
+      <!-- Fullscreen toggle -->
+      <button class="miniBtn" id="btnMinus" title="Hide UI (Fullscreen)">∑</button>
+    </div>
+
+  </div>
+  
+  <!-- Discord Username Copy Script -->
+  <script>
+    function copyDiscordUsername() {
+      const username = 'inyourrealm';
+      
+      // Try to copy to clipboard
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(username).then(() => {
+          showToast('Discord username copied! 📋');
+        }).catch(() => {
+          // Fallback
+          fallbackCopy(username);
+        });
+      } else {
+        // Fallback for older browsers
+        fallbackCopy(username);
+      }
+    }
+    
+    function fallbackCopy(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        showToast('Discord username copied! 📋');
+      } catch (err) {
+        showToast('Failed to copy. Username: inyourrealm');
+      }
+      
+      document.body.removeChild(textArea);
+    }
+    
+    function showToast(message) {
+      // Remove existing toast if any
+      const existingToast = document.querySelector('.discord-toast');
+      if (existingToast) {
+        existingToast.remove();
+      }
+      
+      // Create toast
+      const toast = document.createElement('div');
+      toast.className = 'discord-toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      // Animate in
+      setTimeout(() => toast.classList.add('show'), 10);
+      
+      // Animate out and remove
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
