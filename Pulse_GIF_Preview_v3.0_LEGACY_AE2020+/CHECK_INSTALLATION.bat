@@ -61,10 +61,10 @@ if exist ".debug" (
     echo [!] .debug file MISSING!
 )
 
-if exist "CEPEXT\manifest.xml" (
-    echo [OK] manifest.xml found
+if exist "CSXS\manifest.xml" (
+    echo [OK] manifest.xml found (CSXS\manifest.xml)
 ) else (
-    echo [!] manifest.xml MISSING!
+    echo [!] manifest.xml MISSING! (should be in CSXS\ folder)
 )
 
 if exist "js\main.js" (

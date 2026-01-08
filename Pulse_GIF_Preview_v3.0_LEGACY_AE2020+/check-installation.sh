@@ -41,10 +41,10 @@ else
     echo "[!] .debug file MISSING!"
 fi
 
-if [ -f "CEPEXT/manifest.xml" ]; then
-    echo "[OK] manifest.xml found"
+if [ -f "CSXS/manifest.xml" ]; then
+    echo "[OK] manifest.xml found (CSXS/manifest.xml)"
 else
-    echo "[!] manifest.xml MISSING!"
+    echo "[!] manifest.xml MISSING! (should be in CSXS/ folder)"
 fi
 
 if [ -f "js/main.js" ]; then
